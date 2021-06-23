@@ -14,6 +14,7 @@ router.post('/signup', async (req, res, next) => {
 
         data.password = await bcrypt.hash(data.password, 10)
 
+	    B
         try {
             let user = new User(data)
             let saved_user = await user.save()
@@ -24,6 +25,7 @@ router.post('/signup', async (req, res, next) => {
             }, process.env.JWT_PASS)
 
             res.send({
+                result: true,
                 token,
                 user: {
                     id: saved_user._id,
@@ -55,7 +57,7 @@ router.post('/signin', async (req, res, next) => {
     if (validate.result) {
 
         try {
-            let user = await User.findOne({ $or: [{ email: data.email }, { phone: data.email }] })
+            let user = await User.findOne({email : data.email})
             if (user !== null) {
 
                 let password = user.password
@@ -78,14 +80,14 @@ router.post('/signin', async (req, res, next) => {
                 } else {
                     res.send({
                         result: false,
-                        msg: "Invalid credentials"
+                        msg: "Invalid password"
                     })
                 }
 
             } else {
                 res.send({
                     result: false,
-                    msg: "Invalid credentials"
+                    msg: "No user found with the given email id"
                 })
             }
         } catch (err) {
@@ -104,7 +106,7 @@ router.post('/signin', async (req, res, next) => {
 
 //user token verification
 router.post("/validateToken", async (req, res) => {
-    let data = req.data
+    let data = req.body
     let validate = validateTokenRequest(data)
 
     if (validate.result) {
@@ -124,12 +126,14 @@ router.post("/validateToken", async (req, res) => {
                 msg: "Token verification successfully"
             })
         } else {
+		B
             res.send({
                 result: false,
                 msg: "Invalid token"
             })
+		A
         }
-
+ 
     } else {
         res.send({
             result: false,
